@@ -183,6 +183,13 @@
     padding: 2px 8px; border: 1px solid var(--border); border-radius: 100px;
   }
 
+  .section-note {
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: var(--text4);
+    margin-bottom: 18px;
+  }
+
   /* 준비 중 */
   .empty-section {
     padding: 60px 0;
@@ -227,11 +234,11 @@
 <div class="cat-bar">
   <div class="cat-tabs">
     <button class="cat-tab active" onclick="setCat(this,'photographers')">사진가</button>
-    <button class="cat-tab" onclick="setCat(this,'museums')">사진 전문 미술관</button>
+    <button class="cat-tab" onclick="setCat(this,'museums')">전문 미술관</button>
     <button class="cat-tab" onclick="setCat(this,'major-museums')">주요 미술관</button>
-    <button class="cat-tab" onclick="setCat(this,'magazines')">사진 잡지와 출판사</button>
+    <button class="cat-tab" onclick="setCat(this,'magazines')">잡지와 출판사</button>
     <button class="cat-tab" onclick="setCat(this,'awards')">사진상</button>
-    <button class="cat-tab" onclick="setCat(this,'festivals')">사진 축제</button>
+    <button class="cat-tab" onclick="setCat(this,'festivals')">축제</button>
     <button class="cat-tab" onclick="setCat(this,'photobooks')">사진집</button>
     <button class="cat-tab" onclick="setCat(this,'books')">사진책</button>
   </div>
@@ -309,6 +316,7 @@
   </div>
   <div class="layout">
     <div class="section-label">PHOTOBOOKS</div>
+    <div class="section-note">구매 연결은 참고용입니다</div>
     <div class="photographers-grid" id="photobookGrid"></div>
   </div>
 </div>
@@ -323,6 +331,7 @@
   </div>
   <div class="layout">
     <div class="section-label">BOOKS</div>
+    <div class="section-note">구매 연결은 참고용입니다</div>
     <div class="photographers-grid" id="bookGrid"></div>
   </div>
 </div>
@@ -960,6 +969,17 @@
       ]
     },
     {
+      name: "Richard Avedon",
+      nameKo: "리처드 아베돈",
+      region: "international",
+      magnum: false,
+      links: [
+        { label: "The Richard Avedon Foundation", url: "https://www.richardavedon.com/", tag: "Foundation" },
+        { label: "MoMA에서 찾기", url: "https://www.moma.org/collection/works?q=richard+avedon", tag: "MoMA" },
+        { label: "The Met에서 찾기", url: "https://www.metmuseum.org/art/collection/search?q=richard+avedon", tag: "Met" },
+      ]
+    },
+    {
       name: "Robert Capa",
       nameKo: "로버트 카파",
       region: "international",
@@ -1163,30 +1183,34 @@
       name: "On Photography",
       nameKo: "Susan Sontag · 1977",
       region: "international",
+      desc: "사진이 어떻게 현실을 왜곡하고 재구성하는지를 탐구한 에세이 모음. 사진이 단순한 기록 매체가 아니라 이미지 소비의 도구임을 날카롭게 지적한다. 사진을 다루는 모든 사람에게 권하는 필독서.",
       links: [
-        { label: "Farrar, Straus and Giroux", url: "https://us.macmillan.com/books/9780312420093/onphotography", tag: "Publisher" },
+        { label: "Farrar, Straus and Giroux", url: "https://us.macmillan.com/books/9780312420093/onphotography", tag: "구매" },
       ]
     },
     {
       name: "Camera Lucida",
       nameKo: "Roland Barthes · 1980",
       region: "international",
+      desc: "롤랑 바르트가 사진의 본질을 논한 마지막 책. 어머니의 사진 앞에서 느낀 '찌름'(punctum)의 경험을 출발점으로, 사진이 죽음과 맺는 관계를 사유한다.",
       links: [
-        { label: "Hill and Wang — Camera Lucida", url: "https://us.macmillan.com/books/9780374521349/cameralucida", tag: "Publisher" },
+        { label: "Hill and Wang — Camera Lucida", url: "https://us.macmillan.com/books/9780374521349/cameralucida", tag: "구매" },
       ]
     },
     {
       name: "Ways of Seeing",
       nameKo: "John Berger · 1972",
       region: "international",
+      desc: "이미지를 '보는 방식'이 어떻게 사회적으로 형성되는지를 다룬 책. BBC 다큐멘터리를 원작으로 하며, 회화와 광고 이미지를 분석해 시각 문화 안에 숨은 권력 구조를 드러낸다.",
       links: [
-        { label: "Penguin — Ways of Seeing", url: "https://www.penguin.co.uk/books/56073/ways-of-seeing-by-berger-john/9780140135152", tag: "Publisher" },
+        { label: "Penguin — Ways of Seeing", url: "https://www.penguin.co.uk/books/56073/ways-of-seeing-by-berger-john/9780140135152", tag: "구매" },
       ]
     },
     {
       name: "사진론",
       nameKo: "박상우 · 1999",
       region: "korea",
+      desc: "한국 사진 이론의 드문 체계적 저술. 사진의 본질과 예술적 가능성을 다양한 관점에서 정리한다.",
       links: [
         { label: "준비 중", url: "#", coming: true }
       ]
@@ -1216,6 +1240,7 @@
       <div class="photographer-card">
         <div class="card-name">${b.name}</div>
         <div class="card-name-ko">${b.nameKo}</div>
+        ${b.desc ? `<div class="card-desc">${b.desc}</div>` : ''}
         <div class="card-links">
           ${b.links.map(l => `
             <a class="card-link${l.coming ? ' disabled' : ''}"
