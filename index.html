@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>사진열람</title>
+<style>
+  @font-face {
+    font-family: 'DoHee';
+    src: url('./fonts/dohee.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #141414;
+    --surface: #1e1414;
+    --accent: #f4a7b9;
+    --accent2: #c47a8a;
+    --text: #f4a7b9;
+    --text2: #c47a8a;
+    --text3: #7a5060;
+    --text4: #5a3a4a;
+    --border: #2a1a1a;
+    --card-bg: #1e1414;
+    --hover: #2a1a2a;
+  }
+
+  body.light {
+    --bg: #fde8ef;
+    --surface: #fff0f4;
+    --accent: #c06080;
+    --accent2: #b06070;
+    --text: #3a2030;
+    --text2: #906070;
+    --text3: #c090a0;
+    --text4: #c090a0;
+    --border: #f0c0d0;
+    --card-bg: #fff0f4;
+    --hover: #f5dce8;
+  }
+
+  body {
+    font-family: 'DoHee', -apple-system, 'Apple SD Gothic Neo', sans-serif;
+    font-size: 18px;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  /* 헤더 */
+  header {
+    padding: 20px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg);
+    transition: background 0.3s;
+  }
+  .logo { font-size: 17px; letter-spacing: 5px; color: var(--accent2); }
+  .theme-btn {
+    padding: 6px 16px;
+    border-radius: 100px;
+    font-size: 15px;
+    font-family: 'DoHee', sans-serif;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    transition: all 0.2s;
+  }
+  .theme-btn:hover { opacity: 0.75; }
+
+  /* 최상위 카테고리 탭 */
+  .cat-bar {
+    padding: 20px 28px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .cat-tabs {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .cat-tabs::-webkit-scrollbar { display: none; }
+  .cat-tab {
+    padding: 8px 18px 14px;
+    font-size: 17px;
+    font-family: 'DoHee', sans-serif;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--text3);
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+    letter-spacing: 1px;
+    margin-bottom: -1px;
+  }
+  .cat-tab:hover { color: var(--text2); }
+  .cat-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* 국내/해외 탭 */
+  .region-bar { padding: 22px 28px 0; }
+  .region-tabs { display: flex; gap: 6px; }
+  .region-tab {
+    padding: 6px 20px;
+    border-radius: 100px;
+    font-size: 16px;
+    font-family: 'DoHee', sans-serif;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text3);
+    transition: all 0.2s;
+    letter-spacing: 1px;
+  }
+  .region-tab.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+
+  /* 본문 */
+  .layout {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 28px 28px 80px;
+  }
+  .section-label {
+    font-size: 13px;
+    letter-spacing: 3px;
+    color: var(--text3);
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* 사진가 그리드 */
+  .photographers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 14px;
+  }
+
+  /* 카드 */
+  .photographer-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px 20px 16px;
+    transition: border-color 0.2s;
+  }
+  .photographer-card:hover { border-color: var(--text3); }
+  .card-name { font-size: 17px; color: var(--text); margin-bottom: 4px; }
+  .card-name-ko { font-size: 13px; color: var(--text3); margin-bottom: 16px; letter-spacing: 1px; }
+  .card-links { display: flex; flex-direction: column; gap: 7px; }
+  .card-link {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 14px;
+    color: var(--text3);
+    text-decoration: none;
+    padding: 8px 10px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+  }
+  .card-link:hover { color: var(--accent); border-color: var(--accent2); background: var(--hover); }
+  .card-link.disabled { opacity: 0.3; cursor: default; pointer-events: none; }
+  .link-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent2); flex-shrink: 0; }
+  .link-dot.muted { background: var(--text4); }
+  .link-label { flex: 1; line-height: 1.3; }
+  .link-tag { font-size: 11px; letter-spacing: 1px; color: var(--text4); white-space: nowrap; }
+  .coming-tag {
+    font-size: 10px; letter-spacing: 1px; color: var(--text4);
+    padding: 2px 8px; border: 1px solid var(--border); border-radius: 100px;
+  }
+
+  /* 준비 중 */
+  .empty-section {
+    padding: 60px 0;
+    text-align: center;
+    color: var(--text3);
+    font-size: 16px;
+    letter-spacing: 3px;
+  }
+
+  /* 모바일 */
+  @media (max-width: 700px) {
+    header { padding: 16px 18px; }
+    .logo { font-size: 15px; letter-spacing: 4px; }
+    .theme-btn { font-size: 13px; padding: 5px 12px; }
+
+    .cat-bar { padding: 14px 18px 0; }
+    .cat-tab { font-size: 15px; padding: 7px 12px 12px; }
+
+    .region-bar { padding: 16px 18px 0; }
+    .region-tabs { justify-content: flex-start; }
+    .region-tab { font-size: 14px; padding: 5px 15px; }
+
+    .layout { padding: 20px 18px 60px; }
+    .section-label { font-size: 12px; }
+
+    .photographers-grid { grid-template-columns: 1fr; gap: 10px; }
+    .photographer-card { padding: 16px 16px 14px; }
+    .card-name { font-size: 16px; }
+    .card-name-ko { font-size: 12px; margin-bottom: 12px; }
+    .card-link { font-size: 13px; padding: 7px 9px; }
+    .link-tag { font-size: 10px; }
+  }
+</style>
+</head>
+<body class="light">
+
+<header>
+  <div class="logo">사진열람</div>
+  <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">🌙 어둡게</button>
+</header>
+
+<div class="cat-bar">
+  <div class="cat-tabs">
+    <button class="cat-tab active" onclick="setCat(this,'photographers')">사진가</button>
+    <button class="cat-tab" onclick="setCat(this,'museums')">사진 전문 미술관</button>
+    <button class="cat-tab" onclick="setCat(this,'major-museums')">주요 미술관</button>
+    <button class="cat-tab" onclick="setCat(this,'magazines')">사진 잡지&출판사</button>
+    <button class="cat-tab" onclick="setCat(this,'awards')">사진상</button>
+    <button class="cat-tab" onclick="setCat(this,'festivals')">사진 축제</button>
+  </div>
+</div>
+
+<div id="photographers-section">
+  <div class="region-bar">
+    <div class="region-tabs">
+      <button class="region-tab active" onclick="setRegion(this,'all')">전체</button>
+      <button class="region-tab" onclick="setRegion(this,'international')">해외</button>
+      <button class="region-tab" onclick="setRegion(this,'korea')">국내</button>
+      <button class="region-tab" onclick="setRegion(this,'magnum')">매그넘</button>
+    </div>
+  </div>
+  <div class="layout">
+    <div class="section-label">PHOTOGRAPHERS</div>
+    <div class="photographers-grid" id="photoGrid"></div>
+  </div>
+</div>
+
+<div id="museums-section" style="display:none;">
+  <div class="region-bar">
+    <div class="region-tabs">
+      <button class="region-tab active" onclick="setMuseumRegion(this,'all')">전체</button>
+      <button class="region-tab" onclick="setMuseumRegion(this,'korea')">국내</button>
+      <button class="region-tab" onclick="setMuseumRegion(this,'international')">해외</button>
+    </div>
+  </div>
+  <div class="layout">
+    <div class="section-label">MUSEUMS</div>
+    <div class="photographers-grid" id="museumGrid"></div>
+  </div>
+</div>
+<div id="major-museums-section" style="display:none;">
+  <div class="region-bar">
+    <div class="region-tabs">
+      <button class="region-tab active" onclick="setMajorMuseumRegion(this,'all')">전체</button>
+      <button class="region-tab" onclick="setMajorMuseumRegion(this,'international')">해외</button>
+      <button class="region-tab" onclick="setMajorMuseumRegion(this,'korea')">국내</button>
+    </div>
+  </div>
+  <div class="layout">
+    <div class="section-label">MAJOR MUSEUMS</div>
+    <div class="photographers-grid" id="majorMuseumGrid"></div>
+  </div>
+</div>
+
+<div id="magazines-section" style="display:none;">
+  <div class="region-bar">
+    <div class="region-tabs">
+      <button class="region-tab active" onclick="setMagazineRegion(this,'all')">전체</button>
+      <button class="region-tab" onclick="setMagazineRegion(this,'international')">해외</button>
+      <button class="region-tab" onclick="setMagazineRegion(this,'korea')">국내</button>
+    </div>
+  </div>
+  <div class="layout">
+    <div class="section-label">MAGAZINES</div>
+    <div class="photographers-grid" id="magazineGrid"></div>
+  </div>
+</div>
+<div id="awards-section" style="display:none;">
+  <div class="layout"><div class="empty-section">— 준비 중 —</div></div>
+</div>
+<div id="festivals-section" style="display:none;">
+  <div class="layout"><div class="empty-section">— 준비 중 —</div></div>
+</div>
+
+<script>
+  const SECTIONS = ['photographers','museums','major-museums','magazines','awards','festivals'];
+
+  /* 테마 */
+  const saved = localStorage.getItem('photography-theme') || 'light';
+  document.body.className = saved;
+  document.getElementById('themeBtn').textContent = saved === 'dark' ? '☀️ 밝게' : '🌙 어둡게';
+
+  function toggleTheme() {
+    const next = document.body.className === 'dark' ? 'light' : 'dark';
+    document.body.className = next;
+    localStorage.setItem('photography-theme', next);
+    document.getElementById('themeBtn').textContent = next === 'dark' ? '☀️ 밝게' : '🌙 어둡게';
+  }
+
+  /* 카테고리 */
+  function setCat(el, cat) {
+    document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    SECTIONS.forEach(s => {
+      document.getElementById(s + '-section').style.display = s === cat ? '' : 'none';
+    });
+  }
+
+  /* 주요 미술관 데이터 */
+  const MAJOR_MUSEUMS = [
+    {
+      name: "Getty",
+      nameEn: "J. Paul Getty Museum · 1954 · Los Angeles",
+      region: "international",
+      links: [
+        { label: "공식 웹사이트", url: "https://www.getty.edu/", tag: "Website" },
+      ]
+    },
+    {
+      name: "MoMA",
+      nameEn: "Museum of Modern Art · 1929 · New York",
+      region: "international",
+      links: [
+        { label: "공식 웹사이트", url: "https://www.moma.org/", tag: "Website" },
+      ]
+    },
+    {
+      name: "The Met",
+      nameEn: "Metropolitan Museum of Art · 1870 · New York",
+      region: "international",
+      links: [
+        { label: "공식 웹사이트", url: "https://www.metmuseum.org/", tag: "Website" },
+      ]
+    },
+  ];
+
+  let currentMajorMuseumRegion = 'all';
+  function setMajorMuseumRegion(el, region) {
+    el.closest('.region-tabs').querySelectorAll('.region-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    currentMajorMuseumRegion = region;
+    renderMajorMuseumGrid();
+  }
+
+  function renderMajorMuseumGrid() {
+    const grid = document.getElementById('majorMuseumGrid');
+    const list = currentMajorMuseumRegion === 'all'
+      ? MAJOR_MUSEUMS
+      : MAJOR_MUSEUMS.filter(m => m.region === currentMajorMuseumRegion);
+
+    if (list.length === 0) {
+      grid.innerHTML = '<div class="empty-section">— 준비 중 —</div>';
+      return;
+    }
+
+    grid.innerHTML = list.map(m => `
+      <div class="photographer-card">
+        <div class="card-name">${m.name}</div>
+        <div class="card-name-ko">${m.nameEn}</div>
+        <div class="card-links">
+          ${m.links.map(l => `
+            <a class="card-link${l.coming ? ' disabled' : ''}"
+               href="${l.coming ? '#' : l.url}"
+               ${l.coming ? '' : 'target="_blank" rel="noopener"'}>
+              <span class="link-dot${l.coming ? ' muted' : ''}"></span>
+              <span class="link-label">${l.label}</span>
+              ${l.coming
+                ? '<span class="coming-tag">준비 중</span>'
+                : `<span class="link-tag">${l.tag} ↗</span>`}
+            </a>
+          `).join('')}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  /* 사진 잡지 데이터 */
+  const MAGAZINES = [
+    {
+      name: "Aperture",
+      nameKo: "1952 · USA",
+      region: "international",
+      links: [
+        { label: "공식 웹사이트", url: "https://aperture.org/", tag: "Website" },
+        { label: "Magazine", url: "https://aperture.org/magazine/", tag: "Magazine" },
+      ]
+    },
+    {
+      name: "British Journal of Photography",
+      nameKo: "1854 · UK",
+      region: "international",
+      links: [
+        { label: "1854.photography (공식 웹사이트)", url: "https://www.1854.photography/", tag: "Website" },
+      ]
+    },
+    {
+      name: "Foam Magazine",
+      nameKo: "2001 · Netherlands",
+      region: "international",
+      links: [
+        { label: "공식 웹사이트", url: "https://www.foam.org/foam-magazine", tag: "Website" },
+      ]
+    },
+    {
+      name: "GUP Magazine",
+      nameKo: "Netherlands",
+      region: "international",
+      links: [
+        { label: "공식 웹사이트", url: "https://www.gupnew.com/", tag: "Website" },
+      ]
+    },
+    {
+      name: "LensCulture",
+      nameKo: "2004 · Online",
+      region: "international",
+      links: [
+        { label: "공식 웹사이트", url: "https://www.lensculture.com/", tag: "Website" },
+      ]
+    },
+    {
+      name: "Steidl",
+      nameKo: "1968 · Germany",
+      region: "international",
+      links: [
+        { label: "공식 웹사이트", url: "https://steidl.de/", tag: "Website" },
+        { label: "Photography Books", url: "https://steidl.de/Books/Photography-0104064348.html", tag: "Catalogue" },
+      ]
+    },
+    {
+      name: "보스토크 VOSTOK",
+      nameKo: "2016 · 한국",
+      region: "korea",
+      links: [
+        { label: "공식 웹사이트", url: "http://vostokpress.net/", tag: "Website" },
+        { label: "Instagram @vostok_mag", url: "https://www.instagram.com/vostok_mag/", tag: "Instagram" },
+      ]
+    },
+  ];
+
+  let currentMagazineRegion = 'all';
+  function setMagazineRegion(el, region) {
+    el.closest('.region-tabs').querySelectorAll('.region-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    currentMagazineRegion = region;
+    renderMagazineGrid();
+  }
+
+  function renderMagazineGrid() {
+    const grid = document.getElementById('magazineGrid');
+    const list = currentMagazineRegion === 'all'
+      ? MAGAZINES
+      : MAGAZINES.filter(m => m.region === currentMagazineRegion);
+
+    if (list.length === 0) {
+      grid.innerHTML = '<div class="empty-section">— 준비 중 —</div>';
+      return;
+    }
+
+    grid.innerHTML = list.map(m => `
+      <div class="photographer-card">
+        <div class="card-name">${m.name}</div>
+        <div class="card-name-ko">${m.nameKo}</div>
+        <div class="card-links">
+          ${m.links.map(l => `
+            <a class="card-link${l.coming ? ' disabled' : ''}"
+               href="${l.coming ? '#' : l.url}"
+               ${l.coming ? '' : 'target="_blank" rel="noopener"'}>
+              <span class="link-dot${l.coming ? ' muted' : ''}"></span>
+              <span class="link-label">${l.label}</span>
+              ${l.coming
+                ? '<span class="coming-tag">준비 중</span>'
+                : `<span class="link-tag">${l.tag} ↗</span>`}
+            </a>
+          `).join('')}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  /* 사진 전문 미술관 데이터 */
+  const MUSEUMS = [
+    {
+      name: "Fraenkel Gallery",
+      nameEn: "1979 · San Francisco",
+      region: "international",
+      links: [
+        { label: "공식 웹사이트", url: "https://fraenkelgallery.com/", tag: "Website" },
+      ]
+    },
+    {
+      name: "Center for Creative Photography",
+      nameEn: "1975 · Tucson, USA",
+      region: "international",
+      links: [
+        { label: "공식 웹사이트", url: "https://ccp.arizona.edu/", tag: "Website" },
+      ]
+    },
+    {
+      name: "George Eastman Museum",
+      nameEn: "1947 · Rochester, USA",
+      region: "international",
+      links: [
+        { label: "공식 웹사이트", url: "https://www.eastman.org/", tag: "Website" },
+      ]
+    },
+    {
+      name: "Howard Greenberg Gallery",
+      nameEn: "1981 · New York",
+      region: "international",
+      links: [
+        { label: "공식 웹사이트", url: "https://www.howardgreenberg.com/", tag: "Website" },
+      ]
+    },
+    {
+      name: "고은사진미술관",
+      nameEn: "Goeun Museum of Photography",
+      region: "korea",
+      links: [
+        { label: "공식 홈페이지", url: "https://www.goeunmuseum.kr/", tag: "Website" },
+      ]
+    },
+    {
+      name: "동강사진박물관",
+      nameEn: "Donggang Museum of Photography",
+      region: "korea",
+      links: [
+        { label: "공식 홈페이지", url: "https://www.dgphotomuseum.com/", tag: "Website" },
+      ]
+    },
+    {
+      name: "류가헌",
+      nameEn: "Ryugaheon",
+      region: "korea",
+      links: [
+        { label: "Instagram @ryugaheon", url: "https://www.instagram.com/ryugaheon/", tag: "Instagram" },
+      ]
+    },
+    {
+      name: "뮤지엄 한미",
+      nameEn: "Museum Hanmi",
+      region: "korea",
+      links: [
+        { label: "공식 홈페이지", url: "https://museumhanmi.or.kr/", tag: "Website" },
+      ]
+    },
+    {
+      name: "서울시립사진미술관",
+      nameEn: "Seoul Museum of Photography",
+      region: "korea",
+      links: [
+        { label: "공식 홈페이지 (SeMA)", url: "https://sema.seoul.go.kr/kr/visit/photo_museum", tag: "Website" },
+      ]
+    },
+  ];
+
+  let currentMuseumRegion = 'all';
+  function setMuseumRegion(el, region) {
+    el.closest('.region-tabs').querySelectorAll('.region-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    currentMuseumRegion = region;
+    renderMuseumGrid();
+  }
+
+  function renderMuseumGrid() {
+    const grid = document.getElementById('museumGrid');
+    const list = currentMuseumRegion === 'all'
+      ? MUSEUMS
+      : MUSEUMS.filter(m => m.region === currentMuseumRegion);
+
+    if (list.length === 0) {
+      grid.innerHTML = '<div class="empty-section">— 준비 중 —</div>';
+      return;
+    }
+
+    grid.innerHTML = list.map(m => `
+      <div class="photographer-card">
+        <div class="card-name">${m.name}</div>
+        <div class="card-name-ko">${m.nameEn}</div>
+        <div class="card-links">
+          ${m.links.map(l => `
+            <a class="card-link${l.coming ? ' disabled' : ''}"
+               href="${l.coming ? '#' : l.url}"
+               ${l.coming ? '' : 'target="_blank" rel="noopener"'}>
+              <span class="link-dot${l.coming ? ' muted' : ''}"></span>
+              <span class="link-label">${l.label}</span>
+              ${l.coming
+                ? '<span class="coming-tag">준비 중</span>'
+                : `<span class="link-tag">${l.tag} ↗</span>`}
+            </a>
+          `).join('')}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  /* 지역 */
+  let currentRegion = 'all';
+  function setRegion(el, region) {
+    el.closest('.region-tabs').querySelectorAll('.region-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    currentRegion = region;
+    renderGrid();
+  }
+
+  /* 사진가 데이터 */
+  const PHOTOGRAPHERS = [
+    {
+      name: "Alex Webb",
+      nameKo: "알렉스 웹",
+      region: "international",
+      magnum: true,
+      links: [
+        { label: "Webb & Norris Webb (공식 사이트)", url: "https://webbnorriswebb.co", tag: "Personal" },
+        { label: "Magnum Photos", url: "https://www.magnumphotos.com/photographer/alex-webb/", tag: "Magnum" },
+      ]
+    },
+    {
+      name: "Alfred Stieglitz",
+      nameKo: "앨프레드 스티글리츠",
+      region: "international",
+      magnum: false,
+      links: [
+        { label: "The Alfred Stieglitz Collection — Art Institute of Chicago", url: "https://archive.artic.edu/stieglitz/", tag: "Archive" },
+        { label: "Alfred Stieglitz Key Set — National Gallery of Art", url: "https://www.nga.gov/research/publications/alfred-stieglitz-key-set", tag: "Archive" },
+        { label: "MoMA에서 찾기", url: "https://www.moma.org/collection/works?q=alfred+stieglitz", tag: "MoMA" },
+        { label: "The Met에서 찾기", url: "https://www.metmuseum.org/art/collection/search?q=alfred+stieglitz", tag: "Met" },
+      ]
+    },
+    {
+      name: "Anders Petersen",
+      nameKo: "안데르스 페테르센",
+      region: "international",
+      magnum: false,
+      links: [
+        { label: "Steidl — Anders Petersen", url: "https://steidl.de/Artists/Anders-Petersen-0205283351.html", tag: "Publisher" },
+        { label: "MoMA에서 찾기", url: "https://www.moma.org/collection/works?q=anders+petersen", tag: "MoMA" },
+      ]
+    },
+    {
+      name: "André Kertész",
+      nameKo: "앙드레 케르테츠",
+      region: "international",
+      magnum: false,
+      links: [
+        { label: "National Gallery of Art — André Kertész", url: "https://www.nga.gov/collection/artist-info.13566.html", tag: "Archive" },
+        { label: "MoMA에서 찾기", url: "https://www.moma.org/collection/works?q=andre+kertesz", tag: "MoMA" },
+        { label: "The Met에서 찾기", url: "https://www.metmuseum.org/art/collection/search?q=andre+kertesz", tag: "Met" },
+      ]
+    },
+    {
+      name: "Ansel Adams",
+      nameKo: "앤젤 애덤스",
+      region: "international",
+      magnum: false,
+      links: [
+        { label: "The Ansel Adams Gallery", url: "https://www.anseladams.com/", tag: "Personal" },
+        { label: "MoMA에서 찾기", url: "https://www.moma.org/collection/works?q=ansel+adams", tag: "MoMA" },
+        { label: "The Met에서 찾기", url: "https://www.metmuseum.org/art/collection/search?q=ansel+adams", tag: "Met" },
+      ]
+    },
+    {
+      name: "August Sander",
+      nameKo: "아우구스트 잔더",
+      region: "international",
+      magnum: false,
+      links: [
+        { label: "August Sander Stiftung", url: "https://augustsander.org/", tag: "Foundation" },
+        { label: "MoMA에서 찾기", url: "https://www.moma.org/collection/works?q=august+sander", tag: "MoMA" },
+        { label: "The Met에서 찾기", url: "https://www.metmuseum.org/art/collection/search?q=august+sander", tag: "Met" },
+      ]
+    },
+    {
+      name: "Bill Brandt",
+      nameKo: "빌 브랜트",
+      region: "international",
+      magnum: false,
+      links: [
+        { label: "Bill Brandt Archive", url: "https://www.billbrandt.com/", tag: "Archive" },
+        { label: "MoMA에서 찾기", url: "https://www.moma.org/collection/works?q=bill+brandt", tag: "MoMA" },
+        { label: "The Met에서 찾기", url: "https://www.metmuseum.org/art/collection/search?q=bill+brandt", tag: "Met" },
+      ]
+    },
+    {
+      name: "Cindy Sherman",
+      nameKo: "신디 셔먼",
+      region: "international",
+      magnum: false,
+      links: [
+        { label: "Sprüth Magers (갤러리)", url: "https://spruethmagers.com/artists/cindy-sherman/", tag: "Gallery" },
+        { label: "MoMA에서 찾기", url: "https://www.moma.org/collection/works?q=cindy+sherman", tag: "MoMA" },
+        { label: "The Met에서 찾기", url: "https://www.metmuseum.org/art/collection/search?q=cindy+sherman", tag: "Met" },
+      ]
+    },
+    {
+      name: "Derek Ridgers",
+      nameKo: "데릭 리저스",
+      region: "international",
+      magnum: false,
+      links: [
+        { label: "공식 웹사이트", url: "https://www.derekridgers.com/", tag: "Personal" },
+        { label: "Derek Ridgers Archive", url: "https://www.derekridgersarchive.com/", tag: "Archive" },
+      ]
+    },
+    {
+      name: "Dorothea Lange",
+      nameKo: "도로시아 랭",
+      region: "international",
+      magnum: false,
+      links: [
+        { label: "Dorothea Lange Digital Archive — OMCA", url: "https://dorothealange.museumca.org/", tag: "Archive" },
+        { label: "MoMA에서 찾기", url: "https://www.moma.org/collection/works?q=dorothea+lange", tag: "MoMA" },
+        { label: "The Met에서 찾기", url: "https://www.metmuseum.org/art/collection/search?q=dorothea+lange", tag: "Met" },
+      ]
+    },
+    {
+      name: "Edward Steichen",
+      nameKo: "에드워드 스타이컨",
+      region: "international",
+      magnum: false,
+      links: [
+        { label: "Estate of Edward Steichen", url: "https://www.edwardsteichen.com/", tag: "Archive" },
+        { label: "MoMA에서 찾기", url: "https://www.moma.org/collection/works?q=edward+steichen", tag: "MoMA" },
+        { label: "The Met에서 찾기", url: "https://www.metmuseum.org/art/collection/search?q=edward+steichen", tag: "Met" },
+      ]
+    },
+    {
+      name: "Edward Weston",
+      nameKo: "에드워드 웨스턴",
+      region: "international",
+      magnum: false,
+      links: [
+        { label: "Center for Creative Photography — Edward Weston", url: "https://ccp.arizona.edu/artists/edward-weston/", tag: "Archive" },
+        { label: "MoMA에서 찾기", url: "https://www.moma.org/collection/works?q=edward+weston", tag: "MoMA" },
+      ]
+    },
+    {
+      name: "Florence Henri",
+      nameKo: "플로렌스 헨리",
+      region: "international",
+      magnum: false,
+      links: [
+        { label: "Florence Henri Archives — Holden Luntz", url: "https://www.holdenluntz.com/artists/florence-henri/", tag: "Archive" },
+        { label: "AWARE — Women Artists Archive", url: "https://awarewomenartists.com/en/artiste/florence-henri/", tag: "Archive" },
+        { label: "MoMA에서 찾기", url: "https://www.moma.org/collection/works?q=florence+henri", tag: "MoMA" },
+      ]
+    },
+    {
+      name: "George Hoyningen-Huene",
+      nameKo: "조지 호이닝겐-휴에네",
+      region: "international",
+      magnum: false,
+      links: [
+        { label: "George Hoyningen-Huene Estate Archives", url: "https://www.georgehoyningenhuene.org/", tag: "Archive" },
+        { label: "MoMA에서 찾기", url: "https://www.moma.org/collection/works?q=george+hoyningen-huene", tag: "MoMA" },
+        { label: "The Met에서 찾기", url: "https://www.metmuseum.org/art/collection/search?q=george+hoyningen-huene", tag: "Met" },
+      ]
+    },
+    {
+      name: "Harry Gruyaert",
+      nameKo: "해리 그뤼아에르트",
+      region: "international",
+      magnum: true,
+      links: [
+        { label: "개인 웹사이트", url: "https://www.harrygruyaert-film.com", tag: "Personal" },
+        { label: "Magnum Photos", url: "https://www.magnumphotos.com/photographer/harry-gruyaert/", tag: "Magnum" },
+      ]
+    },
+    {
+      name: "Henri Cartier-Bresson",
+      nameKo: "앙리 카르티에-브레송",
+      region: "international",
+      magnum: true,
+      links: [
+        { label: "Fondation Henri Cartier-Bresson", url: "https://www.henricartierbresson.org", tag: "Foundation" },
+        { label: "Magnum Photos", url: "https://www.magnumphotos.com/photographer/henri-cartier-bresson/", tag: "Magnum" },
+        { label: "MoMA에서 찾기", url: "https://www.moma.org/collection/works?q=henri+cartier-bresson", tag: "MoMA" },
+      ]
+    },
+    {
+      name: "Hiroshi Sugimoto",
+      nameKo: "히로시 스기모토",
+      region: "international",
+      magnum: false,
+      links: [
+        { label: "공식 웹사이트", url: "https://www.sugimotohiroshi.com/", tag: "Personal" },
+        { label: "MoMA에서 찾기", url: "https://www.moma.org/collection/works?q=hiroshi+sugimoto", tag: "MoMA" },
+        { label: "The Met에서 찾기", url: "https://www.metmuseum.org/art/collection/search?q=hiroshi+sugimoto", tag: "Met" },
+      ]
+    },
+    {
+      name: "Jacqueline Hassink",
+      nameKo: "재클린 하싱크",
+      region: "international",
+      magnum: false,
+      links: [
+        { label: "Benrubi Gallery", url: "https://www.benrubigallery.com/artist/58/jacqueline-hassink", tag: "Gallery" },
+        { label: "MoMA에서 찾기", url: "https://www.moma.org/collection/works?q=jacqueline+hassink", tag: "MoMA" },
+        { label: "The Met에서 찾기", url: "https://www.metmuseum.org/art/collection/search?q=jacqueline+hassink", tag: "Met" },
+      ]
+    },
+    {
+      name: "Josef Sudek",
+      nameKo: "요제프 수덱",
+      region: "international",
+      magnum: false,
+      links: [
+        { label: "Ateliér Josefa Sudka (프라하 스튜디오)", url: "https://www.atelierjosefasudka.cz/en/", tag: "Archive" },
+        { label: "Sudek Project — 온라인 아카이브", url: "https://www.sudekproject.cz/en", tag: "Archive" },
+        { label: "MoMA에서 찾기", url: "https://www.moma.org/collection/works?q=josef+sudek", tag: "MoMA" },
+        { label: "The Met에서 찾기", url: "https://www.metmuseum.org/art/collection/search?q=josef+sudek", tag: "Met" },
+      ]
+    },
+    {
+      name: "Lewis Hine",
+      nameKo: "루이스 하인",
+      region: "international",
+      magnum: false,
+      links: [
+        { label: "George Eastman Museum", url: "https://www.eastman.org/lewis-hine", tag: "Archive" },
+        { label: "MoMA에서 찾기", url: "https://www.moma.org/collection/works?q=lewis+hine", tag: "MoMA" },
+        { label: "The Met에서 찾기", url: "https://www.metmuseum.org/art/collection/search?q=lewis+hine", tag: "Met" },
+      ]
+    },
+    {
+      name: "Man Ray",
+      nameKo: "만 레이",
+      region: "international",
+      magnum: false,
+      links: [
+        { label: "Man Ray Archives — Getty Research Institute", url: "https://www.getty.edu/research/special_collections/notable/man_ray.html", tag: "Archive" },
+        { label: "MoMA에서 찾기", url: "https://www.moma.org/collection/works?q=man+ray", tag: "MoMA" },
+        { label: "The Met에서 찾기", url: "https://www.metmuseum.org/art/collection/search?q=man+ray", tag: "Met" },
+      ]
+    },
+    {
+      name: "Margriet Smulders",
+      nameKo: "마르흐리트 스멀더스",
+      region: "international",
+      magnum: false,
+      links: [
+        { label: "공식 웹사이트", url: "https://margrietsmulders.nl/", tag: "Personal" },
+      ]
+    },
+    {
+      name: "Mark Power",
+      nameKo: "마크 파워",
+      region: "international",
+      magnum: true,
+      links: [
+        { label: "공식 웹사이트", url: "https://www.markpower.co.uk/", tag: "Personal" },
+        { label: "Magnum Photos", url: "https://www.magnumphotos.com/photographer/mark-power/", tag: "Magnum" },
+      ]
+    },
+    {
+      name: "Nan Goldin",
+      nameKo: "낸 골딘",
+      region: "international",
+      magnum: false,
+      links: [
+        { label: "Fraenkel Gallery", url: "https://fraenkelgallery.com/artists/nan-goldin", tag: "Gallery" },
+        { label: "MoMA에서 찾기", url: "https://www.moma.org/collection/works?q=nan+goldin", tag: "MoMA" },
+        { label: "The Met에서 찾기", url: "https://www.metmuseum.org/art/collection/search?q=nan+goldin", tag: "Met" },
+      ]
+    },
+    {
+      name: "Paul Strand",
+      nameKo: "폴 스트랜드",
+      region: "international",
+      magnum: false,
+      links: [
+        { label: "Aperture Foundation — Paul Strand", url: "https://aperture.org/tag/paul-strand/", tag: "Archive" },
+        { label: "MoMA에서 찾기", url: "https://www.moma.org/collection/works?q=paul+strand", tag: "MoMA" },
+        { label: "The Met에서 찾기", url: "https://www.metmuseum.org/art/collection/search?q=paul+strand", tag: "Met" },
+      ]
+    },
+    {
+      name: "Philip Perkis",
+      nameKo: "필립 퍼키스",
+      region: "international",
+      magnum: false,
+      links: [
+        { label: "MoMA에서 찾기", url: "https://www.moma.org/collection/works?q=philip+perkis", tag: "MoMA" },
+        { label: "The Met에서 찾기", url: "https://www.metmuseum.org/art/collection/search?q=Philip+Perkis", tag: "Met" },
+      ]
+    },
+    {
+      name: "Robert Capa",
+      nameKo: "로버트 카파",
+      region: "international",
+      magnum: true,
+      links: [
+        { label: "ICP — International Center of Photography", url: "https://www.icp.org/browse/archive/constituents/robert-capa", tag: "ICP" },
+        { label: "Magnum Photos", url: "https://www.magnumphotos.com/photographer/robert-capa/", tag: "Magnum" },
+        { label: "MoMA에서 찾기", url: "https://www.moma.org/collection/works?q=robert+capa", tag: "MoMA" },
+      ]
+    },
+    {
+      name: "Robert Frank",
+      nameKo: "로버트 프랭크",
+      region: "international",
+      magnum: false,
+      links: [
+        { label: "Robert Frank Foundation", url: "https://www.robertfrankfoundation.org", tag: "Foundation" },
+        { label: "MoMA에서 찾기", url: "https://www.moma.org/collection/works?q=robert+frank", tag: "MoMA" },
+        { label: "The Met에서 찾기", url: "https://www.metmuseum.org/art/collection/search?q=robert+frank", tag: "Met" },
+      ]
+    },
+    {
+      name: "Saul Leiter",
+      nameKo: "소울 레이터",
+      region: "international",
+      magnum: false,
+      links: [
+        { label: "Saul Leiter Foundation", url: "https://www.saulleiterfoundation.org", tag: "Foundation" },
+        { label: "Howard Greenberg Gallery", url: "https://www.howardgreenberg.com/artists/saul-leiter", tag: "Gallery" },
+      ]
+    },
+    {
+      name: "Sebastião Salgado",
+      nameKo: "세바스티앙 살가도",
+      region: "international",
+      magnum: false,
+      links: [
+        { label: "Instituto Terra (재단)", url: "https://institutoterra.org/", tag: "Foundation" },
+        { label: "MoMA에서 찾기", url: "https://www.moma.org/collection/works?q=sebastiao+salgado", tag: "MoMA" },
+      ]
+    },
+    {
+      name: "Trent Parke",
+      nameKo: "트렌트 파크",
+      region: "international",
+      magnum: true,
+      links: [
+        { label: "Michael Reid Gallery", url: "https://michaelreid.com.au/artist/trent-parke/", tag: "Gallery" },
+        { label: "Magnum Photos", url: "https://www.magnumphotos.com/photographer/trent-parke/", tag: "Magnum" },
+      ]
+    },
+    {
+      name: "강운구",
+      nameKo: "Kang Unku",
+      region: "korea",
+      magnum: false,
+      links: [
+        { label: "고은사진미술관 — 우연 또는 필연", url: "https://www.goeunmuseum.kr/bbs/board.php?bo_table=exhibition&wr_id=244&proc=", tag: "Museum" },
+        { label: "뮤지엄한미 — 암각화 또는 사진", url: "https://museumhanmi.or.kr/post_exhibition/%ea%b0%95%ec%9a%b4%ea%b5%ac-%e3%80%8a%ec%95%94%ea%b0%81%ed%99%94-%eb%98%90%eb%8a%94-%ec%82%ac%ec%a7%84%e3%80%8b/", tag: "Museum" },
+      ]
+    },
+    {
+      name: "전몽각",
+      nameKo: "Jeon Monggak",
+      region: "korea",
+      magnum: false,
+      links: [
+        { label: "전몽각 갤러리 (공식 사이트)", url: "https://www.jmong.net/", tag: "Personal" },
+        { label: "윤미네 집", url: "https://jmong.net/yunmi/_text/", tag: "Series" },
+      ]
+    },
+    {
+      name: "최민식",
+      nameKo: "Choi Minsik",
+      region: "korea",
+      magnum: false,
+      links: [
+        { label: "고은사진미술관 — 최민식 사진展", url: "https://www.goeunmuseum.kr/bbs/board.php?bo_table=exhibition&wr_id=52", tag: "Museum" },
+        { label: "부산문화재단 전자아카이브", url: "http://e-archive.bscf.or.kr/23_db/db_view.php?part=a&idx=56", tag: "Archive" },
+      ]
+    },
+  ];
+
+  function renderGrid() {    const grid = document.getElementById('photoGrid');
+    const list = currentRegion === 'all'
+      ? PHOTOGRAPHERS
+      : currentRegion === 'magnum'
+        ? PHOTOGRAPHERS.filter(p => p.magnum)
+        : PHOTOGRAPHERS.filter(p => p.region === currentRegion);
+
+    if (list.length === 0) {
+      grid.innerHTML = '<div class="empty-section">— 준비 중 —</div>';
+      return;
+    }
+
+    grid.innerHTML = list.map(p => `
+      <div class="photographer-card">
+        <div class="card-name">${p.name}</div>
+        <div class="card-name-ko">${p.nameKo}</div>
+        <div class="card-links">
+          ${p.links.map(l => `
+            <a class="card-link${l.coming ? ' disabled' : ''}"
+               href="${l.coming ? '#' : l.url}"
+               ${l.coming ? '' : 'target="_blank" rel="noopener"'}>
+              <span class="link-dot${l.coming ? ' muted' : ''}"></span>
+              <span class="link-label">${l.label}</span>
+              ${l.coming
+                ? '<span class="coming-tag">준비 중</span>'
+                : `<span class="link-tag">${l.tag} ↗</span>`}
+            </a>
+          `).join('')}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  renderGrid();
+  renderMuseumGrid();
+  renderMajorMuseumGrid();
+  renderMagazineGrid();
+</script>
+</body>
+</html>
