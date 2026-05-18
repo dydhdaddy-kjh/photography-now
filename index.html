@@ -158,6 +158,7 @@
   .photographer-card:hover { border-color: var(--text3); }
   .card-name { font-size: 17px; color: var(--text); margin-bottom: 4px; }
   .card-name-ko { font-size: 13px; color: var(--text3); margin-bottom: 16px; letter-spacing: 1px; }
+  .card-desc { font-size: 13px; color: var(--text2); line-height: 1.7; margin-bottom: 14px; }
   .card-links { display: flex; flex-direction: column; gap: 7px; }
   .card-link {
     display: flex;
@@ -228,11 +229,11 @@
     <button class="cat-tab active" onclick="setCat(this,'photographers')">사진가</button>
     <button class="cat-tab" onclick="setCat(this,'museums')">사진 전문 미술관</button>
     <button class="cat-tab" onclick="setCat(this,'major-museums')">주요 미술관</button>
-    <button class="cat-tab" onclick="setCat(this,'magazines')">사진 잡지&출판사</button>
+    <button class="cat-tab" onclick="setCat(this,'magazines')">사진 잡지와 출판사</button>
     <button class="cat-tab" onclick="setCat(this,'awards')">사진상</button>
     <button class="cat-tab" onclick="setCat(this,'festivals')">사진 축제</button>
     <button class="cat-tab" onclick="setCat(this,'photobooks')">사진집</button>
-    <button class="cat-tab" onclick="setCat(this,'books')">책</button>
+    <button class="cat-tab" onclick="setCat(this,'books')">사진책</button>
   </div>
 </div>
 
@@ -1081,32 +1082,36 @@
       name: "The Americans",
       nameKo: "Robert Frank · 1958",
       region: "international",
+      desc: "잭 케루악의 서문과 함께 1958년 파리에서 먼저 출간되었다. 83장의 사진으로 1950년대 미국의 인종·계급·고독을 담아냈으며, 발표 당시 미국 언론의 혹평을 받았지만 이후 현대 사진의 가장 중요한 책으로 평가받는다.",
       links: [
-        { label: "Aperture — The Americans", url: "https://aperture.org/books/the-americans/", tag: "Publisher" },
+        { label: "Aperture — The Americans", url: "https://aperture.org/books/the-americans/", tag: "구매" },
       ]
     },
     {
       name: "Diane Arbus: An Aperture Monograph",
       nameKo: "Diane Arbus · 1972",
       region: "international",
+      desc: "아버스 사후 1년 만에 출간된 첫 번째 모노그래프. 사회의 가장자리에 놓인 사람들—쌍둥이, 거인, 나체주의자—을 정면으로 바라보는 시선이 담겼다. 출간 즉시 베스트셀러가 되었고, 사진집 역사상 가장 많이 팔린 책 중 하나로 꼽힌다.",
       links: [
-        { label: "Aperture — Diane Arbus Monograph", url: "https://aperture.org/books/diane-arbus-an-aperture-monograph/", tag: "Publisher" },
+        { label: "Aperture — Diane Arbus Monograph", url: "https://aperture.org/books/diane-arbus-an-aperture-monograph/", tag: "구매" },
       ]
     },
     {
       name: "In the American West",
       nameKo: "Richard Avedon · 1985",
       region: "international",
+      desc: "5년에 걸쳐 서부 17개 주를 다니며 촬영한 대형 포트레이트 시리즈. 새하얀 배경 앞에 선 노동자, 광부, 떠돌이들의 얼굴이 어떤 미화도 없이 드러난다. 패션 사진으로 유명한 아베든이 전혀 다른 얼굴로 돌아온 작업이다.",
       links: [
-        { label: "Abrams — In the American West", url: "https://www.abramsbooks.com/product/in-the-american-west_9780810908284/", tag: "Publisher" },
+        { label: "Abrams — In the American West", url: "https://www.abramsbooks.com/product/in-the-american-west_9780810908284/", tag: "구매" },
       ]
     },
     {
       name: "윤미네 집",
       nameKo: "전몽각 · 1997",
       region: "korea",
+      desc: "사진가 전몽각이 딸 윤미의 출생부터 성장까지 20여 년간 기록한 가족 사진집. 사랑하는 대상을 향한 시선의 힘을 보여주는 책이다.",
       links: [
-        { label: "윤미네 집 — 온라인 아카이브", url: "https://jmong.net/yunmi/_text/", tag: "Archive" },
+        { label: "윤미네 집 — 온라인 아카이브", url: "https://jmong.net/yunmi/_text/", tag: "아카이브" },
       ]
     },
   ];
@@ -1134,6 +1139,7 @@
       <div class="photographer-card">
         <div class="card-name">${b.name}</div>
         <div class="card-name-ko">${b.nameKo}</div>
+        ${b.desc ? `<div class="card-desc">${b.desc}</div>` : ''}
         <div class="card-links">
           ${b.links.map(l => `
             <a class="card-link${l.coming ? ' disabled' : ''}"
@@ -1151,7 +1157,7 @@
     `).join('');
   }
 
-  /* 책 데이터 */
+  /* 사진책 데이터 */
   const BOOKS = [
     {
       name: "On Photography",
