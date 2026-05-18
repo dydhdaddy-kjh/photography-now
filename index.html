@@ -231,6 +231,8 @@
     <button class="cat-tab" onclick="setCat(this,'magazines')">사진 잡지&출판사</button>
     <button class="cat-tab" onclick="setCat(this,'awards')">사진상</button>
     <button class="cat-tab" onclick="setCat(this,'festivals')">사진 축제</button>
+    <button class="cat-tab" onclick="setCat(this,'photobooks')">사진집</button>
+    <button class="cat-tab" onclick="setCat(this,'books')">책</button>
   </div>
 </div>
 
@@ -296,8 +298,36 @@
   <div class="layout"><div class="empty-section">— 준비 중 —</div></div>
 </div>
 
+<div id="photobooks-section" style="display:none;">
+  <div class="region-bar">
+    <div class="region-tabs">
+      <button class="region-tab active" onclick="setPhotobookRegion(this,'all')">전체</button>
+      <button class="region-tab" onclick="setPhotobookRegion(this,'international')">해외</button>
+      <button class="region-tab" onclick="setPhotobookRegion(this,'korea')">국내</button>
+    </div>
+  </div>
+  <div class="layout">
+    <div class="section-label">PHOTOBOOKS</div>
+    <div class="photographers-grid" id="photobookGrid"></div>
+  </div>
+</div>
+
+<div id="books-section" style="display:none;">
+  <div class="region-bar">
+    <div class="region-tabs">
+      <button class="region-tab active" onclick="setBookRegion(this,'all')">전체</button>
+      <button class="region-tab" onclick="setBookRegion(this,'international')">해외</button>
+      <button class="region-tab" onclick="setBookRegion(this,'korea')">국내</button>
+    </div>
+  </div>
+  <div class="layout">
+    <div class="section-label">BOOKS</div>
+    <div class="photographers-grid" id="bookGrid"></div>
+  </div>
+</div>
+
 <script>
-  const SECTIONS = ['photographers','museums','major-museums','magazines','awards','festivals'];
+  const SECTIONS = ['photographers','museums','major-museums','magazines','awards','festivals','photobooks','books'];
 
   /* 테마 */
   const saved = localStorage.getItem('photography-theme') || 'light';
@@ -735,6 +765,18 @@
       ]
     },
     {
+      name: "Diane Arbus",
+      nameKo: "다이앤 아버스",
+      region: "international",
+      magnum: false,
+      links: [
+        { label: "Diane Arbus Estate — Fraenkel Gallery", url: "https://fraenkelgallery.com/artists/diane-arbus", tag: "Gallery" },
+        { label: "MoMA에서 찾기", url: "https://www.moma.org/collection/works?q=diane+arbus", tag: "MoMA" },
+        { label: "The Met에서 찾기", url: "https://www.metmuseum.org/art/collection/search?q=diane+arbus", tag: "Met" },
+        { label: "Aperture Foundation — Diane Arbus", url: "https://aperture.org/tag/diane-arbus/", tag: "Aperture" },
+      ]
+    },
+    {
       name: "Dorothea Lange",
       nameKo: "도로시아 랭",
       region: "international",
@@ -1033,10 +1075,164 @@
     `).join('');
   }
 
+  /* 사진집 데이터 */
+  const PHOTOBOOKS = [
+    {
+      name: "The Americans",
+      nameKo: "Robert Frank · 1958",
+      region: "international",
+      links: [
+        { label: "Aperture — The Americans", url: "https://aperture.org/books/the-americans/", tag: "Publisher" },
+      ]
+    },
+    {
+      name: "Diane Arbus: An Aperture Monograph",
+      nameKo: "Diane Arbus · 1972",
+      region: "international",
+      links: [
+        { label: "Aperture — Diane Arbus Monograph", url: "https://aperture.org/books/diane-arbus-an-aperture-monograph/", tag: "Publisher" },
+      ]
+    },
+    {
+      name: "In the American West",
+      nameKo: "Richard Avedon · 1985",
+      region: "international",
+      links: [
+        { label: "Abrams — In the American West", url: "https://www.abramsbooks.com/product/in-the-american-west_9780810908284/", tag: "Publisher" },
+      ]
+    },
+    {
+      name: "윤미네 집",
+      nameKo: "전몽각 · 1997",
+      region: "korea",
+      links: [
+        { label: "윤미네 집 — 온라인 아카이브", url: "https://jmong.net/yunmi/_text/", tag: "Archive" },
+      ]
+    },
+  ];
+
+  let currentPhotobookRegion = 'all';
+  function setPhotobookRegion(el, region) {
+    el.closest('.region-tabs').querySelectorAll('.region-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    currentPhotobookRegion = region;
+    renderPhotobookGrid();
+  }
+
+  function renderPhotobookGrid() {
+    const grid = document.getElementById('photobookGrid');
+    const list = currentPhotobookRegion === 'all'
+      ? PHOTOBOOKS
+      : PHOTOBOOKS.filter(b => b.region === currentPhotobookRegion);
+
+    if (list.length === 0) {
+      grid.innerHTML = '<div class="empty-section">— 준비 중 —</div>';
+      return;
+    }
+
+    grid.innerHTML = list.map(b => `
+      <div class="photographer-card">
+        <div class="card-name">${b.name}</div>
+        <div class="card-name-ko">${b.nameKo}</div>
+        <div class="card-links">
+          ${b.links.map(l => `
+            <a class="card-link${l.coming ? ' disabled' : ''}"
+               href="${l.coming ? '#' : l.url}"
+               ${l.coming ? '' : 'target="_blank" rel="noopener"'}>
+              <span class="link-dot${l.coming ? ' muted' : ''}"></span>
+              <span class="link-label">${l.label}</span>
+              ${l.coming
+                ? '<span class="coming-tag">준비 중</span>'
+                : `<span class="link-tag">${l.tag} ↗</span>`}
+            </a>
+          `).join('')}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  /* 책 데이터 */
+  const BOOKS = [
+    {
+      name: "On Photography",
+      nameKo: "Susan Sontag · 1977",
+      region: "international",
+      links: [
+        { label: "Farrar, Straus and Giroux", url: "https://us.macmillan.com/books/9780312420093/onphotography", tag: "Publisher" },
+      ]
+    },
+    {
+      name: "Camera Lucida",
+      nameKo: "Roland Barthes · 1980",
+      region: "international",
+      links: [
+        { label: "Hill and Wang — Camera Lucida", url: "https://us.macmillan.com/books/9780374521349/cameralucida", tag: "Publisher" },
+      ]
+    },
+    {
+      name: "Ways of Seeing",
+      nameKo: "John Berger · 1972",
+      region: "international",
+      links: [
+        { label: "Penguin — Ways of Seeing", url: "https://www.penguin.co.uk/books/56073/ways-of-seeing-by-berger-john/9780140135152", tag: "Publisher" },
+      ]
+    },
+    {
+      name: "사진론",
+      nameKo: "박상우 · 1999",
+      region: "korea",
+      links: [
+        { label: "준비 중", url: "#", coming: true }
+      ]
+    },
+  ];
+
+  let currentBookRegion = 'all';
+  function setBookRegion(el, region) {
+    el.closest('.region-tabs').querySelectorAll('.region-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    currentBookRegion = region;
+    renderBookGrid();
+  }
+
+  function renderBookGrid() {
+    const grid = document.getElementById('bookGrid');
+    const list = currentBookRegion === 'all'
+      ? BOOKS
+      : BOOKS.filter(b => b.region === currentBookRegion);
+
+    if (list.length === 0) {
+      grid.innerHTML = '<div class="empty-section">— 준비 중 —</div>';
+      return;
+    }
+
+    grid.innerHTML = list.map(b => `
+      <div class="photographer-card">
+        <div class="card-name">${b.name}</div>
+        <div class="card-name-ko">${b.nameKo}</div>
+        <div class="card-links">
+          ${b.links.map(l => `
+            <a class="card-link${l.coming ? ' disabled' : ''}"
+               href="${l.coming ? '#' : l.url}"
+               ${l.coming ? '' : 'target="_blank" rel="noopener"'}>
+              <span class="link-dot${l.coming ? ' muted' : ''}"></span>
+              <span class="link-label">${l.label}</span>
+              ${l.coming
+                ? '<span class="coming-tag">준비 중</span>'
+                : `<span class="link-tag">${l.tag} ↗</span>`}
+            </a>
+          `).join('')}
+        </div>
+      </div>
+    `).join('');
+  }
+
   renderGrid();
   renderMuseumGrid();
   renderMajorMuseumGrid();
   renderMagazineGrid();
+  renderPhotobookGrid();
+  renderBookGrid();
 </script>
 </body>
 </html>
